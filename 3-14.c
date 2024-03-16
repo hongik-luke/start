@@ -4,7 +4,7 @@
 #define TRUE	1
 #define FALSE	0
 
-#define HEAP_LEN	200010
+#define QUE_LEN	200001
 
 typedef struct _pos
 {
@@ -18,306 +18,171 @@ typedef struct tomato
     int whenripe;
 }Tomato;
 
+typedef Pos Data;
 
-
-typedef Pos LData;
-
-typedef struct _node
+typedef struct _cQueue
 {
-	LData data;
-	struct _node * next;
-} Node;
+	int front;
+	int rear;
+	Data queArr[QUE_LEN];
+}Queue;
 
-typedef struct _linkedList
-{
-	Node * head;
-	Node * cur;
-	Node * before;
-	int numOfData;
-}List;
+void QueueInit(Queue * pq);
+int QIsEmpty(Queue * pq);
+void Enqueue(Queue * pq, Data data);
+Data Dequeue(Queue * pq);
+Data QPeek(Queue * pq);
 
-void ListInit(List * plist);
-void LInsert(List * plist, LData data);
-int LFirst(List * plist, LData * pdata);
-int LNext(List * plist, LData * pdata);
-LData LRemove(List * plist);
-int LCount(List * plist);
-
-
-Pos  upidx(Pos idx, Pos a)
-{
-    Pos nidx = idx;
-    nidx.x = nidx.x - 1;
-    if(nidx.x == -1)
-        return idx;
-        
-    return nidx;
-}
-
-Pos downidx(Pos idx, Pos a)
-{
-    Pos nidx = idx;
-    nidx.x = nidx.x + 1;
-    if(nidx.x == a.y)
-        return idx;
-        
-    return nidx;
-}
-
-Pos leftidx(Pos idx, Pos a)
-{
-    Pos nidx = idx;
-    nidx.y = nidx.y - 1;
-    if(nidx.y == -1)
-        return idx;
-        
-    return nidx;
-}
-
-Pos rightidx(Pos idx, Pos a)
-{
-    Pos nidx = idx;
-    nidx.y = nidx.y + 1;
-    if(nidx.y == a.x)
-        return idx;
-        
-    return nidx;
-}
 
 
 int main(void)
 {
     Pos a;
-
-    scanf("%d %d",&a.x,&a.y);
-    
-    Tomato ** arr =(Tomato*) malloc(sizeof(Tomato)*a.y);
-    
-    for(int i = 0; i<a.x; i++)
-    {
-        arr[i] = (Tomato*) malloc ( sizeof(Tomato) * a.x );
-    }
-    
-    for(int i = 0 ; i < a.y ; i++)
-    {
-        for(int j = 0 ; j < a.x; j++)
-        {
-            scanf("%d",&arr[i][j].ripe);
-            arr[i][j].whenripe = 0;
-        }
-    }
-    
-    
-    int num = 0;
     Pos pos;
-    List list;
-    ListInit(&list);
-    Pos anotherpos ;
+    int max = 0;
+    scanf("%d %d",&a.x,&a.y);
+    Tomato * arr =(Tomato*) malloc(sizeof(Tomato)*a.y *a.x);
     
-    for(int i = 0 ; i < a.y ; i++)
+    for(int i = 0 ; i < a.y*a.x; i++)
     {
-        for(int j = 0 ; j < a.x; j++)
+        scanf("%d",&arr[i].ripe);
+        arr[i].whenripe = 0;
+    }
+    
+    
+    Pos idx;
+    Queue q;
+    QueueInit(&q);
+    for(int i = 0 ; i < a.y*a.x ; i++)
+    {
+        if(arr[i].ripe == 1)
         {
-            if(arr[i][j].ripe == 1)
-            {
-                pos.x = i;
-                pos.y = j;
-                LInsert(&list,pos);
-            }
+            pos.x = i/a.x;
+            pos.y = i%a.x;
+            Enqueue(&q,pos);
         }
     }
     
-    printf("check - %d \n",LCount(&list));
-    
-
-    
-    while(LCount(&list)!= 0)
+    while(!QIsEmpty(&q))
     {
-        if(LFirst(&list,&pos))
+        idx = Dequeue(&q);
+
+        Pos upidx = idx;
+        upidx.x -= 1;
+        if(idx.x != 0 && arr[upidx.x*a.x + upidx.y].ripe == 0)
         {
-            printf("!!!!%d %d\n",pos.x ,pos.y);
-        
-            anotherpos = upidx(pos, a);
-            printf("!!!!%d %d\n",anotherpos.x ,anotherpos.y);
-            if(arr[anotherpos.x][anotherpos.y].ripe == 0)
-            {
-            LInsert(&list,anotherpos);
-            arr[anotherpos.x][anotherpos.y].ripe = 1;
-            arr[anotherpos.x][anotherpos.y].whenripe = arr[pos.x][pos.y].whenripe + 1;
-            }
-    
-    
-
-            anotherpos = downidx(pos, a);
-            if(arr[anotherpos.x][anotherpos.y].ripe == 0)
-            {
-                LInsert(&list,anotherpos);
-                arr[anotherpos.x][anotherpos.y].ripe = 1;
-                arr[anotherpos.x][anotherpos.y].whenripe = arr[pos.x][pos.y].whenripe + 1;
-            }
-
-            anotherpos = leftidx(pos, a);
-            if(arr[anotherpos.x][anotherpos.y].ripe == 0)
-            {
-                LInsert(&list,anotherpos);
-                arr[anotherpos.x][anotherpos.y].ripe = 1;
-                arr[anotherpos.x][anotherpos.y].whenripe = arr[pos.x][pos.y].whenripe + 1;
-            }
-        
-
-            anotherpos = rightidx(pos, a);
-            if(arr[anotherpos.x][anotherpos.y].ripe == 0)
-            {
-                LInsert(&list,anotherpos);
-                arr[anotherpos.x][anotherpos.y].ripe = 1;
-                arr[anotherpos.x][anotherpos.y].whenripe = arr[pos.x][pos.y].whenripe + 1;
-            }
-            LRemove(&list);
-        }
-       
-    } 
-       
-     printf("check - %d \n",LCount(&list));
-        
-        
-        printf("%d\n",LNext(&list,&pos));
-        while(LNext(&list,&pos))
-        {
-
-
-            anotherpos = upidx(pos, a);
-            if(arr[anotherpos.x][anotherpos.y].ripe == 0)
-            {
-                LInsert(&list,anotherpos);
-                arr[anotherpos.x][anotherpos.y].ripe = 1;
-                arr[anotherpos.x][anotherpos.y].whenripe = arr[pos.x][pos.y].whenripe + 1;
-            }
-    
-            anotherpos = downidx(pos, a);
-            if(arr[anotherpos.x][anotherpos.y].ripe == 0)
-            {
-                LInsert(&list,anotherpos);
-                arr[anotherpos.x][anotherpos.y].ripe = 1;
-                arr[anotherpos.x][anotherpos.y].whenripe = arr[pos.x][pos.y].whenripe + 1;
-            }
-        
-
-            anotherpos = leftidx(pos, a);
-            if(arr[anotherpos.x][anotherpos.y].ripe == 0)
-            {
-                LInsert(&list,anotherpos);
-                arr[anotherpos.x][anotherpos.y].ripe = 1;
-                arr[anotherpos.x][anotherpos.y].whenripe = arr[pos.x][pos.y].whenripe + 1;
-            }
-        
-
-            anotherpos = rightidx(pos, a);
-            if(arr[anotherpos.x][anotherpos.y].ripe == 0)
-            {
-                LInsert(&list,anotherpos);
-                arr[anotherpos.x][anotherpos.y].ripe = 1;
-                arr[anotherpos.x][anotherpos.y].whenripe = arr[pos.x][pos.y].whenripe + 1;
-            }
-            LRemove(&list);
             
-            printf("check - %d \n",LCount(&list));
+            Enqueue(&q, upidx);
+            arr[upidx.x*a.x + upidx.y].ripe = 1;
+            arr[upidx.x*a.x + upidx.y].whenripe = arr[idx.x*a.x + idx.y].whenripe + 1;
         }
-        
-    }
     
-
-
-    
-
-    
-    
-    
-    
-    for(int i = 0 ; i < a.y ; i++)
-    {
-        for(int j = 0 ; j < a.x ; j++)
+        Pos downidx = idx;
+        downidx.x += 1;
+        if(idx.x + 1 != a.y && arr[downidx.x*a.x + downidx.y].ripe == 0)
         {
-            printf("%d %d   ",arr[i][j].ripe,arr[i][j].whenripe);
+            
+            Enqueue(&q, downidx);
+            arr[downidx.x*a.x + downidx.y].ripe = 1;
+            arr[downidx.x*a.x + downidx.y].whenripe = arr[idx.x*a.x + idx.y].whenripe + 1;
         }
-        printf("\n");
+    
+        Pos leftidx = idx;
+        leftidx.y -= 1;
+        if(idx.y != 0 && arr[leftidx.x*a.x + leftidx.y].ripe == 0)
+        {
+            Enqueue(&q, leftidx);
+            arr[leftidx.x*a.x + leftidx.y].ripe = 1;
+            arr[leftidx.x*a.x + leftidx.y].whenripe = arr[idx.x*a.x+ idx.y].whenripe + 1;
+        }
+    
+        Pos rightidx = idx;
+        rightidx.y += 1;
+        if(idx.y + 1 != a.x && arr[rightidx.x*a.x + rightidx.y].ripe == 0)
+        {
+            
+            Enqueue(&q, rightidx);
+
+            arr[rightidx.x*a.x + rightidx.y].ripe = 1;
+            arr[rightidx.x*a.x + rightidx.y].whenripe = arr[idx.x*a.x + idx.y].whenripe + 1;
+        }
+
+    }    
+    
+    for(int i = 0 ; i < a.y*a.x ; i++)
+    {
+        if(arr[i].ripe == 1)
+        {
+            if(arr[i].whenripe > max)
+                max = arr[i].whenripe;
+            
+        }
+        else if(arr[i].ripe == 0)
+        {
+            printf("-1");
+            return 1;
+        }
     }
     
+    printf("%d",max);
     
-    
-    
-    
-    
-    
-    
+    return 1;
     
     
     
 }
 
 
-void ListInit(List * plist)
+void QueueInit(Queue * pq)
 {
-	plist->head = (Node*)malloc(sizeof(Node));
-	plist->head->next = NULL;
-	plist->numOfData = 0;
+	pq->front = 0;
+	pq->rear = 0;
 }
 
-void LInsert(List * plist, LData data)
+int QIsEmpty(Queue * pq)
 {
-    Node * newNode = (Node*)malloc(sizeof(Node));
-	newNode->data = data;
-
-	newNode->next = plist->head->next;
-	plist->head->next = newNode;
-
-	(plist->numOfData)++;
-
-}
-
-int LFirst(List * plist, LData * pdata)
-{
-	if(plist->head->next == NULL)
+	if(pq->front == pq->rear)
+		return TRUE;
+	else
 		return FALSE;
-
-	plist->before = plist->head;
-	plist->cur = plist->head->next;
-
-	*pdata = plist->cur->data;
-	return TRUE;
 }
 
-int LNext(List * plist, LData * pdata)
+int NextPosIdx(int pos)
 {
-	if(plist->cur->next == NULL)
-		return 0;
-
-	plist->before = plist->cur;
-	plist->cur = plist->cur->next;
-
-	*pdata = plist->cur->data;
-	return 1;
+	return pos+1;
 }
 
-LData LRemove(List * plist)
+void Enqueue(Queue * pq, Data data)
 {
-	Node * rpos = plist->cur;
-	LData rdata = rpos->data;
+	if(NextPosIdx(pq->rear) == pq->front)
+	{
+		printf("Queue Memory Error!");
+		exit(-1);
+	}
 
-	plist->before->next = plist->cur->next;
-	plist->cur = plist->before;
-
-	free(rpos);
-	(plist->numOfData)--;
-	return rdata;
+	pq->rear = NextPosIdx(pq->rear);
+	pq->queArr[pq->rear] = data;
 }
 
-int LCount(List * plist)
+Data Dequeue(Queue * pq)
 {
-	return plist->numOfData;
+	if(QIsEmpty(pq))
+	{
+		printf("Queue Memory Error!");
+		exit(-1);
+	}
+
+	pq->front = NextPosIdx(pq->front);
+	return pq->queArr[pq->front];
 }
 
+Data QPeek(Queue * pq)
+{
+	if(QIsEmpty(pq))
+	{
+		printf("Queue Memory Error!");
+		exit(-1);
+	}
 
-
-
-
-
+	return pq->queArr[NextPosIdx(pq->front)];
+}
